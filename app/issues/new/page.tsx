@@ -1,6 +1,6 @@
 'use client';
-import React from 'react'
-import { TextArea, TextField } from '@radix-ui/themes'
+import React, { useState } from 'react'
+import { Callout, TextArea, TextField } from '@radix-ui/themes'
 import { Button } from '@radix-ui/themes'
 import SimpleMDE from 'react-simplemde-editor';
 import "easymde/dist/easymde.min.css";
@@ -18,18 +18,29 @@ interface IssueForm{
 const page = () => {
     const {register,control,handleSubmit}=useForm<IssueForm>();
     const router=useRouter();
-
+    const [error,setError]=useState('')
 
   return (
-    <form className='max-w-xl space-y-3' onSubmit={handleSubmit(async (data)=>{
-      await axios.post('/api/issues',data);
-      router.push('/issues');
+    <div className='max-w-xl'>
+    {error && <Callout.Root color='red' className='mb-2'>
+        <Callout.Text>{error}</Callout.Text>
+      </Callout.Root>}
+
+    <form className='space-y-3' onSubmit={handleSubmit(async (data)=>{
+      try{
+        await axios.post('/api/issues',data);
+        router.push('/issues');
+      }catch(error){
+        setError('An Unexpected Error occured')
+      }
     })}>
       <TextField.Root placeholder="Title" {...register('title')}>
       </TextField.Root>
         <Controller name="description" control={control} render={({field})=><SimpleMDE placeholder='Description' {...field}/>}/>
       <Button>Submit New Issue</Button>
     </form>
+    
+    </div>
   )
 }
 
